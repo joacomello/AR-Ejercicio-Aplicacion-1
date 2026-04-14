@@ -5,6 +5,8 @@ export interface ReservationInput {
 	passengerId: string;
 	flightCode: string;
 	seatClass: SeatClass;
+	originCountry?: string;
+	destinationCountry?: string;
 }
 
 export interface ReservationPrice {

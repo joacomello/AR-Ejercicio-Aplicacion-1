@@ -1,5 +1,7 @@
 export type LoyaltyTier = 'bronze' | 'silver' | 'gold' | 'none';
 
+export type PassengerType = 'child' | 'adult' | 'senior';
+
 export interface Passenger {
 	id: string;
 	name: string;
@@ -7,4 +9,6 @@ export interface Passenger {
 	age: number;
 	isActive: boolean;
 	loyaltyTier: LoyaltyTier;
+	countryCode: string;
+	type: PassengerType;
 }

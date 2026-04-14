@@ -1,13 +1,10 @@
-import type { Request, Response } from 'express';
-import type { ReservationService } from '../services/reservationService';
+import { Request, Response } from 'express';
+import { reservationService } from '../services/reservation.service';
 
-export function createPipelineController(reservationService: ReservationService) {
-	return {
-		getConfig: (_request: Request, response: Response) => {
-			response.json(reservationService.getPipelineConfig());
-		},
-		updateConfig: (request: Request, response: Response) => {
-			response.json(reservationService.updatePipelineConfig(request.body ?? {}));
-		},
-	};
+export async function getConfig(_req: Request, res: Response): Promise<void> {
+	res.json(reservationService.getPipelineConfig());
+}
+
+export async function updateConfig(req: Request, res: Response): Promise<void> {
+	res.json(reservationService.updatePipelineConfig(req.body ?? {}));
 }

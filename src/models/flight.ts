@@ -5,4 +5,5 @@ export interface Flight {
 	departureDate: string;
 	availableSeats: number;
 	basePriceUSD: number;
+	durationMinutes: number;
 }

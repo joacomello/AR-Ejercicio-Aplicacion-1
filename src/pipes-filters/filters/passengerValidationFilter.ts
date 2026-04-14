@@ -1,11 +1,11 @@
-import type { LoyaltyTier } from '../../models/passenger';
+import type { Passenger, PassengerType } from '../../models/passenger';
 import type { ReservationContext, ReservationFilter } from '../types';
 
 function isValidEmail(email: string): boolean {
 	return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-function classifyPassengerAge(age: number): 'child' | 'adult' | 'senior' {
+function classifyPassengerAge(age: number): PassengerType {
 	if (age < 12) {
 		return 'child';
 	}
@@ -20,7 +20,9 @@ function classifyPassengerAge(age: number): 'child' | 'adult' | 'senior' {
 export class PassengerValidationFilter implements ReservationFilter {
 	public readonly name = 'passengerValidation' as const;
 
-	public constructor(private readonly passengerRepository: { findById: (id: string) => { id: string; name: string; email: string; age: number; isActive: boolean; loyaltyTier: LoyaltyTier; } | undefined; }) {}
+	public constructor(
+		private readonly passengerRepository: { findById: (id: string) => Passenger | undefined },
+	) {}
 
 	public async execute(context: ReservationContext): Promise<void> {
 		const passenger = this.passengerRepository.findById(context.request.passengerId);
@@ -48,7 +50,21 @@ export class PassengerValidationFilter implements ReservationFilter {
 			return;
 		}
 
+		const derivedType = classifyPassengerAge(passenger.age);
+		if (passenger.type !== derivedType) {
+			context.errors.push(`Passenger ${passenger.id} has inconsistent age/type data. Expected ${derivedType}, got ${passenger.type}.`);
+			context.failed = true;
+			return;
+		}
+
+		if (!passenger.countryCode.trim()) {
+			context.errors.push(`Passenger ${passenger.id} has an invalid country code.`);
+			context.failed = true;
+			return;
+		}
+
 		context.passenger = passenger;
-		context.metadata.passengerType = classifyPassengerAge(passenger.age);
+		context.metadata.passengerType = passenger.type;
+		context.metadata.countryCode = passenger.countryCode;
 	}
 }

@@ -1,6 +1,6 @@
-import type { Request, Response } from 'express';
+import { Request, Response } from 'express';
 import type { ReservationInput } from '../models/reservation';
-import type { ReservationService } from '../services/reservationService';
+import { reservationService } from '../services/reservation.service';
 
 function normalizeReservations(body: unknown): ReservationInput[] {
 	if (Array.isArray(body)) {
@@ -26,25 +26,21 @@ function normalizeConfig(body: unknown) {
 	return {};
 }
 
-export function createReservationController(reservationService: ReservationService) {
-	return {
-		processReservations: async (request: Request, response: Response) => {
-			const reservations = normalizeReservations(request.body);
-			const config = normalizeConfig(request.body);
-			const result = await reservationService.processReservations(reservations, config);
+export async function processReservations(req: Request, res: Response): Promise<void> {
+	const reservations = normalizeReservations(req.body);
+	const config = normalizeConfig(req.body);
+	const result = await reservationService.processReservations(reservations, config);
+	res.status(200).json(result);
+}
 
-			response.status(200).json(result);
-		},
-		getReservationStatus: (request: Request, response: Response) => {
-			const reservationId = String(request.params.id ?? '');
-			const status = reservationService.getReservationStatus(reservationId);
+export async function getReservationStatus(req: Request, res: Response): Promise<void> {
+	const reservationId = String(req.params.id ?? '');
+	const status = reservationService.getReservationStatus(reservationId);
 
-			if (!status) {
-				response.status(404).json({ message: 'Reservation not found' });
-				return;
-			}
+	if (!status) {
+		res.status(404).send('Reservation not found');
+		return;
+	}
 
-			response.json(status);
-		},
-	};
+	res.json(status);
 }

@@ -14,6 +14,7 @@ export const mockFlights: Flight[] = [
 		departureDate: futureDate(10),
 		availableSeats: 12,
 		basePriceUSD: 100,
+		durationMinutes: 540,
 	},
 	{
 		code: 'LA4567',
@@ -22,6 +23,7 @@ export const mockFlights: Flight[] = [
 		departureDate: futureDate(7),
 		availableSeats: 0,
 		basePriceUSD: 220,
+		durationMinutes: 610,
 	},
 	{
 		code: 'IB900',
@@ -30,6 +32,7 @@ export const mockFlights: Flight[] = [
 		departureDate: futureDate(3),
 		availableSeats: 4,
 		basePriceUSD: 150,
+		durationMinutes: 120,
 	},
 	{
 		code: 'AR777',
@@ -38,6 +41,7 @@ export const mockFlights: Flight[] = [
 		departureDate: futureDate(-2),
 		availableSeats: 3,
 		basePriceUSD: 180,
+		durationMinutes: 240,
 	},
 	{
 		code: 'MX808',
@@ -46,5 +50,6 @@ export const mockFlights: Flight[] = [
 		departureDate: futureDate(15),
 		availableSeats: 6,
 		basePriceUSD: 130,
+		durationMinutes: 190,
 	},
 ];

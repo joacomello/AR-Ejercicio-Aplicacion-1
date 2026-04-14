@@ -8,6 +8,8 @@ export const mockPassengers: Passenger[] = [
 		age: 34,
 		isActive: true,
 		loyaltyTier: 'gold',
+		countryCode: 'AR',
+		type: 'adult',
 	},
 	{
 		id: 'PAX-002',
@@ -16,6 +18,8 @@ export const mockPassengers: Passenger[] = [
 		age: 10,
 		isActive: true,
 		loyaltyTier: 'silver',
+		countryCode: 'BR',
+		type: 'child',
 	},
 	{
 		id: 'PAX-003',
@@ -24,6 +28,8 @@ export const mockPassengers: Passenger[] = [
 		age: 71,
 		isActive: true,
 		loyaltyTier: 'bronze',
+		countryCode: 'ES',
+		type: 'senior',
 	},
 	{
 		id: 'PAX-004',
@@ -32,6 +38,8 @@ export const mockPassengers: Passenger[] = [
 		age: 42,
 		isActive: false,
 		loyaltyTier: 'none',
+		countryCode: 'US',
+		type: 'adult',
 	},
 	{
 		id: 'PAX-005',
@@ -40,5 +48,7 @@ export const mockPassengers: Passenger[] = [
 		age: 27,
 		isActive: true,
 		loyaltyTier: 'bronze',
+		countryCode: 'MX',
+		type: 'adult',
 	},
 ];

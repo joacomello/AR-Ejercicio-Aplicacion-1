@@ -1,8 +1,8 @@
 import type { ReservationInput } from '../models/reservation';
-import type { FlightRepository } from '../repositories/flightRepository';
-import type { PassengerRepository } from '../repositories/passengerRepository';
-import type { ReservationRepository } from '../repositories/reservationRepository';
-import type { ExchangeService } from './exchange.service';
+import { FlightRepository } from '../repositories/flightRepository';
+import { PassengerRepository } from '../repositories/passengerRepository';
+import { ReservationRepository } from '../repositories/reservationRepository';
+import { ExchangeService } from './exchange.service';
 import { createDefaultPipelineConfig } from '../pipes-filters/config';
 import { createReservationPipeline, mergeConfig } from '../pipes-filters/pipeline';
 import type { PipelineConfig, PipelineRunResult, ReservationContext } from '../pipes-filters/types';
@@ -94,3 +94,11 @@ export class ReservationService {
 		};
 	}
 }
+
+export const reservationService = new ReservationService({
+	passengerRepository: new PassengerRepository(),
+	flightRepository: new FlightRepository(),
+	reservationRepository: new ReservationRepository(),
+	exchangeService: new ExchangeService(),
+	config: createDefaultPipelineConfig(),
+});
