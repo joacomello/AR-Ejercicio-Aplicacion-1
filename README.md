@@ -1,7 +1,6 @@
-# ADR [#] - [Título – es la decisión tomada]
+# ADR-EJ1 - Arquitectura Pipes & Filters para Sistema de Reservas de Vuelos
 
 **Equipo:**
-
 - 305595 - Joaquin Mello
 - 282191 - Catalina Griego
 - 308052 - Mainoí Caballero
@@ -11,127 +10,206 @@
 
 ## Fuerzas
 
-- _Modularidad:_ El negocio requiere que las reglas de validación y cálculo sean independientes.
-- _Configurabilidad:_ Se debe poder habilitar o deshabilitar pasos del proceso (filtros) sin afectar al resto.
-- _Resiliencia:_ La integración con APIs externas (tipo de cambio) no debe ser un punto único de falla.
-- _Testabilidad:_ Cada regla de negocio (descuentos, tasas, validaciones) debe poder probarse de forma aislada.
-
----
+- **Modularidad:** El negocio requiere que las reglas de validación y cálculo sean independientes.
+- **Configurabilidad:** Se debe poder habilitar o deshabilitar pasos del proceso (filtros) sin afectar al resto.
+- **Resiliencia:** La integración con APIs externas (tipo de cambio) no debe ser un punto único de falla.
+- **Testabilidad:** Cada regla de negocio (descuentos, tasas, validaciones) debe poder probarse de forma aislada.
 
 ## Decisión
 
-Nosotros haremos uso del patrón arquitectónico Pipes & Filters. Cada reserva fluye a través de una tubería compuesta por una serie de filtros independientes que comparten un contexto común (ReservationContext). La ejecución es secuencial y permite detener el proceso si un filtro de validación falla.
+Se adopta el **patrón arquitectónico Pipes & Filters**. Cada reserva fluye a través de una tubería compuesta por **7 filtros independientes** que comparten un contexto común (`ReservationContext`). La ejecución es **secuencial**:
+
+- **Filtros de validación** (Passenger, Flight): Detienen el pipeline si fallan (`context.failed = true`).
+- **Filtros de cálculo/enriquecimiento** (Pricing, Exchange): Capturan errores internamente y continúan el pipeline, agregando advertencias.
+
+### Flujo de Filtros
+```
+Entrada → PassengerValidation → FlightValidation → BasePriceCalculation 
+       → LoyaltyDiscount → PassengerTypeAdjustment → TaxesAndFees 
+       → ExchangeRateEnrichment → Salida
+```
 
 ## Justificación
 
-Este patrón es ideal para sistemas de procesamiento de datos por pasos. Permite cumplir con el requerimiento de "filtros independientes y testeables" y facilita la implementación de los endpoints de configuración del pipeline. Se rechazó una arquitectura monolítica tradicional porque dificultaría la activación/desactivación dinámica de las reglas de cálculo.
+Este patrón es ideal para sistemas de **procesamiento de datos por etapas** porque:
 
-## Estado
+1. **Separación de Responsabilidades:** Cada filtro maneja una única regla de negocio (SRP).
+2. **Configurabilidad Dinámica:** Los endpoints `/pipeline/config` permiten habilitar/deshabilitar filtros sin despliegue.
+3. **Testabilidad:** Cada filtro es independiente y puede testearse de forma aislada.
+4. **Extensibilidad:** Es posible agregar nuevos filtros con modificaciones mínimas al código existente.
 
-[Borrador / Propuesta / Aceptada / Despreciada / Reemplazada]
+## Opciones Rechazadas
 
----
+### Enfoque Monolítico
+Crear un único servicio de reserva con una función lineal gigante.
+- **Problema:** Viola SRP, dificulta pruebas unitarias, rígido ante cambios de negocio.
 
 ## Consecuencias
 
-- **Se adoptó por:**  
-  Facilidad para agregar nuevas reglas de negocio y reporte de errores.
-- **Se adoptó a pesar de:**  
-  Incremento de complejidad inicial para gestionar el estado del contexto a través de la tubería.
-- **Opción rechazada:**
-  - _Enfoque Monolítico_
-    Se rechazó la creación de un único servicio de reserva con una función lineal gigante. Aunque es más simple de implementar inicialmente, viola el principio de Responsabilidad Única (SRP) y hace que el sistema sea extremadamente rígido
-  - _Responsabilidad en Cadena_
-    Se descartó porque semánticamente este patrón se utiliza para que uno de muchos receptores maneje una petición y detenga el flujo. En nuestro sistema de vuelos, necesitamos que todos los filtros procesen la reserva de forma acumulativa.
+### Beneficios
+- Facilidad para agregar nuevas reglas de negocio.
+- Reporte de errores por filtro.
+- Endpoints de configuración dinámica del pipeline.
+- Cache y fallback en llamadas externas.
+
+### Costos
+- Complejidad inicial de implementación del pipeline.
+- Necesidad de serializar/clonar datos en repositorios para evitar mutaciones.
+- Overhead de validaciones en cada filtro.
 
 ---
 
-## Material de referencia
+## Referencias
 
-[LINK]
+- **Patrón Pipes & Filters:** Material de clase
 
-# Sistema de Reservas de Vuelos
+---
 
-Sistema de procesamiento de reservas con Node.js, TypeScript, Express y el patrón Pipes & Filters.
+# Sistema de Reservas de Vuelos - Documentación Técnica
+
+## Stack Tecnológico
+
+| Componente | Versión | Propósito |
+|-----------|---------|----------|
+| **Node.js** | 18+ | Runtime JavaScript |
+| **TypeScript** | 6.0.2 | Type safety (strict mode) |
+| **Express** | 5.2.1 | Framework HTTP |
+| **tsx** | 4.20.3 | TypeScript executor para tests |
 
 ## Requisitos
 
-- Node.js 18 o superior
-- npm
+- **Node.js** 18 o superior
+- **npm** 10 o superior (incluido con Node.js)
 
 ## Instalación
 
+### 1. Clonar/Descargar el Repositorio
+```bash
+cd AR-Ejercicio-Aplicacion-1
+```
+
+### 2. Instalar Dependencias
 ```bash
 npm install
 ```
 
-## Desarrollo
+Este comando instala:
+- **Producción:** `express`
+- **Desarrollo:** `typescript`, `@types/express`, `@types/node`, `tsx`
 
+### 3. Compilar TypeScript
 ```bash
 npm run build
+```
+
+Genera archivos `.js` en la carpeta `dist/` con tipos verificados en strict mode.
+
+## Ejecución
+
+### Iniciar el Servidor
+```bash
 npm start
 ```
 
-El servidor escucha por defecto en `http://localhost:3000`.
+**Salida esperada:**
+```
+Server listening on port 3000
+```
 
-## Tests
+El servidor escucha en `http://localhost:3000` con los siguientes endpoints disponibles:
+- `POST /reservations/process` - Procesar reservas
+- `GET /reservations/:id/status` - Obtener estado de reserva
+- `GET /pipeline/config` - Ver configuración del pipeline
+- `PUT /pipeline/config` - Actualizar configuración del pipeline
+- `GET /health` - Verificar salud del servidor
 
+## Testing
+
+### Ejecutar Suite Completa de Tests
 ```bash
 npm test
 ```
 
-## Endpoints
+## Estructura del Proyecto
 
-### POST /reservations/process
+```
+src/
+├── index.ts                    # Entry point Express
+├── controllers/
+│   ├── reservationController.ts
+│   └── pipelineController.ts    
+├── data/                       # Datos de prueba
+│   ├── mockFlights.ts           
+│   └── mockPassengers.ts        
+├── models/
+│   ├── flight.ts                
+│   ├── passenger.ts             
+│   └── reservation.ts           
+├── pipes-filters/
+│   ├── config.ts                # Configuración por defecto (filtros, exchange)
+│   ├── pipeline.ts              # Orquestador de ejecución Pipes & Filters
+│   ├── types.ts                 # Tipos de contexto y filtros
+│   └── filters/                 # Filtros implementados
+│       ├── basePriceCalculationFilter.ts
+│       ├── exchangeRateEnrichmentFilter.ts
+│       ├── flightValidationFilter.ts
+│       ├── loyaltyDiscountFilter.ts
+│       ├── passengerTypeAdjustmentFilter.ts
+│       ├── passengerValidationFilter.ts
+│       └── taxesAndFeesFilter.ts
+├── repositories/
+│   ├── flightRepository.ts      
+│   ├── passengerRepository.ts   
+│   └── reservationRepository.ts
+└── services/
+    ├── exchange.service.ts      # API integraciones 
+    └── reservation.service.ts   # Orquestador principal (singleton)
 
-Procesa un array de reservas por el pipeline.
+tests/
+├── reservation.test.ts          # 25 tests (unitarios + integración)
+└── tsconfig.json                # Config TypeScript para tests
 
-Ejemplo:
-
-```json
-{
-  "reservations": [
-    {
-      "id": "RES-001",
-      "passengerId": "PAX-001",
-      "flightCode": "AA001",
-      "seatClass": "business",
-      "originCountry": "US",
-      "destinationCountry": "AR"
-    }
-  ]
-}
+postman/
+└── flight-reservations.postman_collection.json  # requests de prueba
 ```
 
-### GET /reservations/:id/status
+## Flujo de Procesamiento
 
-Devuelve el estado procesado de una reserva específica.
-
-### GET /pipeline/config
-
-Muestra la configuración activa del pipeline.
-
-### PUT /pipeline/config
-
-Permite habilitar o deshabilitar filtros y ajustar la configuración de conversión.
-
-Ejemplo:
-
-```json
-{
-  "enabledFilters": {
-    "exchangeRateEnrichment": false
-  }
-}
 ```
-
-## Arquitectura
-
-- Los datos de validación viven en memoria en `src/data/`.
-- Los repositorios son in-memory y se clonan para evitar efectos colaterales en tests.
-- El filtro de tipo de cambio usa timeout, retry, cache y fallback.
-- Cada filtro del pipeline es independiente y testeable por separado.
-
-## Postman
-
-La colección de Postman está en `postman/flight-reservations.postman_collection.json`.
+POST /reservations/process
+           ↓
+  Validación de Payload (400 si inválido)
+           ↓
+  Para cada reserva en el array:
+           ↓
+  [1] PassengerValidationFilter
+      ├─ ✗ Pasajero inactivo → error, stop
+      └─ ✓ Validado → context.passenger
+           ↓
+  [2] FlightValidationFilter
+      ├─ ✗ Vuelo sin asientos → error, stop
+      ├─ ✗ Vuelo pasado → error, stop
+      └─ ✓ Validado → context.flight
+           ↓
+  [3] BasePriceCalculationFilter
+      └─ basePriceUSD × seatMultiplier → subtotalUSD
+           ↓
+  [4] LoyaltyDiscountFilter
+      └─ subtotalUSD × (1 - loyaltyDiscount%) → subtotalUSD
+           ↓
+  [5] PassengerTypeAdjustmentFilter
+      └─ subtotalUSD × (1 + typeAdjustment%) → subtotalUSD
+           ↓
+  [6] TaxesAndFeesFilter
+      └─ Suma: taxesUSD, airportFeeUSD, fuelSurchargeUSD → totalUSD
+           ↓
+  [7] ExchangeRateEnrichmentFilter
+      ├─ Intenta API (timeout 5s, retry 3x)
+      ├─ Si falla: usa cache (1h TTL)
+      ├─ Si cache vacío: usa fallback rates
+      └─ convertedTotal = totalUSD × exchangeRate
+           ↓
+  Almacenar en ReservationRepository
+           ↓
+  200 OK con resultado procesado
+```

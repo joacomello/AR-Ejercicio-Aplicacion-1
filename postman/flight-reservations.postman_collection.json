@@ -2,12 +2,12 @@
 	"info": {
 		"name": "Flight Reservations Pipeline",
 		"_postman_id": "b2d4e45c-5f7b-4ad2-8f06-8df7db0d9d15",
-		"description": "Colección para el sistema de reservas de vuelos con Pipes & Filters",
+		"description": "Coleccion para el sistema de reservas de vuelos con Pipes & Filters",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "Process Reservations",
+			"name": "01 - Process Reservations",
 			"request": {
 				"method": "POST",
 				"header": [
@@ -28,7 +28,91 @@
 			}
 		},
 		{
-			"name": "Get Reservation Status",
+			"name": "02 - Process (Nino + Silver + Destino AR)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/reservations/process",
+					"host": ["{{baseUrl}}"],
+					"path": ["reservations", "process"]
+				},
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"reservations\": [\n    {\n      \"id\": \"TEST-ARS-CHILD\",\n      \"passengerId\": \"PAX-002\",\n      \"flightCode\": \"AA001\",\n      \"seatClass\": \"economy\"\n    }\n  ]\n}"
+				}
+			}
+		},
+		{
+			"name": "03 - Process (Adulto + Gold + Business)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/reservations/process",
+					"host": ["{{baseUrl}}"],
+					"path": ["reservations", "process"]
+				},
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"reservations\": [\n    {\n      \"id\": \"TEST-GOLD-BUS\",\n      \"passengerId\": \"PAX-001\",\n      \"flightCode\": \"MX808\",\n      \"seatClass\": \"business\"\n    }\n  ]\n}"
+				}
+			}
+		},
+		{
+			"name": "04 - Process Error (Pasajero Inactivo)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/reservations/process",
+					"host": ["{{baseUrl}}"],
+					"path": ["reservations", "process"]
+				},
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"reservations\": [\n    {\n      \"passengerId\": \"PAX-004\",\n      \"flightCode\": \"AA001\",\n      \"seatClass\": \"economy\"\n    }\n  ]\n}"
+				}
+			}
+		},
+		{
+			"name": "05 - Process Error (Vuelo sin Asientos)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/reservations/process",
+					"host": ["{{baseUrl}}"],
+					"path": ["reservations", "process"]
+				},
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"reservations\": [\n    {\n      \"passengerId\": \"PAX-001\",\n      \"flightCode\": \"LA4567\",\n      \"seatClass\": \"economy\"\n    }\n  ]\n}"
+				}
+			}
+		},
+		{
+			"name": "06 - Get Reservation Status (RES-001)",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -40,7 +124,19 @@
 			}
 		},
 		{
-			"name": "Get Pipeline Config",
+			"name": "07 - Get Reservation Status (TEST-ARS-CHILD)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/reservations/TEST-ARS-CHILD/status",
+					"host": ["{{baseUrl}}"],
+					"path": ["reservations", "TEST-ARS-CHILD", "status"]
+				}
+			}
+		},
+		{
+			"name": "08 - Get Pipeline Config",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -52,7 +148,7 @@
 			}
 		},
 		{
-			"name": "Update Pipeline Config",
+			"name": "09 - Update Pipeline Config",
 			"request": {
 				"method": "PUT",
 				"header": [
@@ -68,7 +164,7 @@
 				},
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"enabledFilters\": {\n    \"exchangeRateEnrichment\": false\n  }\n}"
+					"raw": "{\n  \"filters\": [\n    {\n      \"name\": \"passengerValidation\",\n      \"enabled\": false\n    },\n    {\n      \"name\": \"flightValidation\",\n      \"enabled\": true\n    },\n    {\n      \"name\": \"basePriceCalculation\",\n      \"enabled\": true\n    },\n    {\n      \"name\": \"loyaltyDiscounts\",\n      \"enabled\": true\n    },\n    {\n      \"name\": \"passengerTypeAdjustments\",\n      \"enabled\": false\n    },\n    {\n      \"name\": \"taxesAndFees\",\n      \"enabled\": true\n    },\n    {\n      \"name\": \"exchangeRateEnrichment\",\n      \"enabled\": true\n    }\n  ]\n}"
 				}
 			}
 		}
@@ -76,7 +172,8 @@
 	"variable": [
 		{
 			"key": "baseUrl",
-			"value": "http://localhost:3000"
+			"value": "http://localhost:3000",
+			"type": "string"
 		}
 	]
 }
