@@ -11,10 +11,10 @@
 
 ## Fuerzas
 
-- Modularidad: El negocio requiere que las reglas de validación y cálculo sean independientes.
-- Configurabilidad: Se debe poder habilitar o deshabilitar pasos del proceso (filtros) sin afectar al resto.
-- Resiliencia: La integración con APIs externas (tipo de cambio) no debe ser un punto único de falla.
-- Testabilidad: Cada regla de negocio (descuentos, tasas, validaciones) debe poder probarse de forma aislada.
+- _Modularidad:_ El negocio requiere que las reglas de validación y cálculo sean independientes.
+- _Configurabilidad:_ Se debe poder habilitar o deshabilitar pasos del proceso (filtros) sin afectar al resto.
+- _Resiliencia:_ La integración con APIs externas (tipo de cambio) no debe ser un punto único de falla.
+- _Testabilidad:_ Cada regla de negocio (descuentos, tasas, validaciones) debe poder probarse de forma aislada.
 
 ---
 
@@ -38,11 +38,10 @@ Este patrón es ideal para sistemas de procesamiento de datos por pasos. Permite
   Facilidad para agregar nuevas reglas de negocio y reporte de errores.
 - **Se adoptó a pesar de:**  
   Incremento de complejidad inicial para gestionar el estado del contexto a través de la tubería.
-
 - **Opción rechazada:**
-  - Enfoque Monolítico
+  - _Enfoque Monolítico_
     Se rechazó la creación de un único servicio de reserva con una función lineal gigante. Aunque es más simple de implementar inicialmente, viola el principio de Responsabilidad Única (SRP) y hace que el sistema sea extremadamente rígido
-  - Responsabilidad en Cadena
+  - _Responsabilidad en Cadena_
     Se descartó porque semánticamente este patrón se utiliza para que uno de muchos receptores maneje una petición y detenga el flujo. En nuestro sistema de vuelos, necesitamos que todos los filtros procesen la reserva de forma acumulativa.
 
 ---
