@@ -1,49 +1,85 @@
-# ADR [#] - [Título – es la decisión tomada]
+# Sistema de Reservas de Vuelos
 
-**Equipo:**  
-- 305595 - Joaquin Mello
-- 282191 - Catalina Griego
-- 308052 - Mainoí Caballero
-- 298024 - Carolina Otero
+Sistema de procesamiento de reservas con Node.js, TypeScript, Express y el patrón Pipes & Filters.
 
----
+## Requisitos
 
-## Fuerzas
-[Describa aquí las fuerzas que influyeron la decisión de diseño, incluyendo los aspectos tecnológicos, costos de proyecto.]
+- Node.js 18 o superior
+- npm
 
----
+## Instalación
 
-## Decisión
-[Describa aquí nuestra respuesta a estas fuerzas, es decir, la decisión de diseño que se tomó. Exprese la decisión en oraciones completas, con voz activa ("Nosotros haremos ...").]
+```bash
+npm install
+```
 
----
+## Desarrollo
 
-## Justificación
-[Describa aquí la justificación de la decisión de diseño. Indique también la justificación de alternativas significativas que hayan sido rechazadas. Esta sección también puede indicar suposiciones, restricciones, requisitos y resultados de evaluaciones y experimentos.]
+```bash
+npm run build
+npm start
+```
 
----
+El servidor escucha por defecto en `http://localhost:3000`.
 
-## Estado
-[Borrador / Propuesta / Aceptada / Despreciada / Reemplazada]
+## Tests
 
----
+```bash
+npm test
+```
 
-## Consecuencias
+## Endpoints
 
-- **Se adoptó por:**  
-  [Beneficio de adoptarla]
+### POST /reservations/process
 
-- **Se adoptó a pesar de:**  
-  [Desventaja de adoptarla]
+Procesa un array de reservas por el pipeline.
 
-- [Repetir consecuencias]
+Ejemplo:
 
-- **Opción rechazada:**  
-  [Opción rechazada]
+```json
+{
+  "reservations": [
+    {
+      "id": "RES-001",
+      "passengerId": "PAX-001",
+      "flightCode": "AA001",
+      "seatClass": "business",
+      "originCountry": "US",
+      "destinationCountry": "AR"
+    }
+  ]
+}
+```
 
-[Describa aquí el contexto que resulta después de aplicar la decisión. Todas las consecuencias deben enumerarse, no solo las consecuencias "positivas". Indique también las consecuencias "negativas".]
+### GET /reservations/:id/status
 
----
+Devuelve el estado procesado de una reserva específica.
 
-## Material de referencia
-[LINK]
+### GET /pipeline/config
+
+Muestra la configuración activa del pipeline.
+
+### PUT /pipeline/config
+
+Permite habilitar o deshabilitar filtros y ajustar la configuración de conversión.
+
+Ejemplo:
+
+```json
+{
+  "enabledFilters": {
+    "exchangeRateEnrichment": false
+  }
+}
+```
+
+## Arquitectura
+
+- Los datos de validación viven en memoria en `src/data/`.
+- Los repositorios son in-memory y se clonan para evitar efectos colaterales en tests.
+- El filtro de tipo de cambio usa timeout, retry, cache y fallback.
+- Cada filtro del pipeline es independiente y testeable por separado.
+
+## Postman
+
+La colección de Postman está en `postman/flight-reservations.postman_collection.json`.

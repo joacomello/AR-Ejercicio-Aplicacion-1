@@ -1,10 +1,12 @@
 {
   "name": "ej-apl1",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Sistema de reservas de vuelos con pipeline Pipes & Filters",
+  "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "test": "tsx --test tests/reservation.test.ts"
   },
   "keywords": [],
   "author": "",
@@ -14,6 +16,9 @@
     "express": "^5.2.1"
   },
   "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^22.15.3",
+    "tsx": "^4.20.3",
     "typescript": "^6.0.2"
   }
 }

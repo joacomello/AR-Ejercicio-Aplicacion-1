@@ -1,0 +1,82 @@
+{
+	"info": {
+		"name": "Flight Reservations Pipeline",
+		"_postman_id": "b2d4e45c-5f7b-4ad2-8f06-8df7db0d9d15",
+		"description": "Colección para el sistema de reservas de vuelos con Pipes & Filters",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Process Reservations",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/reservations/process",
+					"host": ["{{baseUrl}}"],
+					"path": ["reservations", "process"]
+				},
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"reservations\": [\n    {\n      \"id\": \"RES-001\",\n      \"passengerId\": \"PAX-001\",\n      \"flightCode\": \"AA001\",\n      \"seatClass\": \"business\",\n      \"originCountry\": \"US\",\n      \"destinationCountry\": \"AR\"\n    }\n  ]\n}"
+				}
+			}
+		},
+		{
+			"name": "Get Reservation Status",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/reservations/RES-001/status",
+					"host": ["{{baseUrl}}"],
+					"path": ["reservations", "RES-001", "status"]
+				}
+			}
+		},
+		{
+			"name": "Get Pipeline Config",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/pipeline/config",
+					"host": ["{{baseUrl}}"],
+					"path": ["pipeline", "config"]
+				}
+			}
+		},
+		{
+			"name": "Update Pipeline Config",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/pipeline/config",
+					"host": ["{{baseUrl}}"],
+					"path": ["pipeline", "config"]
+				},
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"enabledFilters\": {\n    \"exchangeRateEnrichment\": false\n  }\n}"
+				}
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000"
+		}
+	]
+}
