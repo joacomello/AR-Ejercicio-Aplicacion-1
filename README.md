@@ -1,6 +1,7 @@
 # ADR [#] - [Título – es la decisión tomada]
 
-**Equipo:**  
+**Equipo:**
+
 - 305595 - Joaquin Mello
 - 282191 - Catalina Griego
 - 308052 - Mainoí Caballero
@@ -9,21 +10,24 @@
 ---
 
 ## Fuerzas
-[Describa aquí las fuerzas que influyeron la decisión de diseño, incluyendo los aspectos tecnológicos, costos de proyecto.]
+
+- Modularidad: El negocio requiere que las reglas de validación y cálculo sean independientes.
+- Configurabilidad: Se debe poder habilitar o deshabilitar pasos del proceso (filtros) sin afectar al resto.
+- Resiliencia: La integración con APIs externas (tipo de cambio) no debe ser un punto único de falla.
+- Testabilidad: Cada regla de negocio (descuentos, tasas, validaciones) debe poder probarse de forma aislada.
 
 ---
 
 ## Decisión
-[Describa aquí nuestra respuesta a estas fuerzas, es decir, la decisión de diseño que se tomó. Exprese la decisión en oraciones completas, con voz activa ("Nosotros haremos ...").]
 
----
+Nosotros haremos uso del patrón arquitectónico Pipes & Filters. Cada reserva fluye a través de una tubería compuesta por una serie de filtros independientes que comparten un contexto común (ReservationContext). La ejecución es secuencial y permite detener el proceso si un filtro de validación falla.
 
 ## Justificación
-[Describa aquí la justificación de la decisión de diseño. Indique también la justificación de alternativas significativas que hayan sido rechazadas. Esta sección también puede indicar suposiciones, restricciones, requisitos y resultados de evaluaciones y experimentos.]
 
----
+Este patrón es ideal para sistemas de procesamiento de datos por pasos. Permite cumplir con el requerimiento de "filtros independientes y testeables" y facilita la implementación de los endpoints de configuración del pipeline. Se rechazó una arquitectura monolítica tradicional porque dificultaría la activación/desactivación dinámica de las reglas de cálculo.
 
 ## Estado
+
 [Borrador / Propuesta / Aceptada / Despreciada / Reemplazada]
 
 ---
@@ -31,24 +35,21 @@
 ## Consecuencias
 
 - **Se adoptó por:**  
-  [Beneficio de adoptarla]
-
+  Facilidad para agregar nuevas reglas de negocio y reporte de errores.
 - **Se adoptó a pesar de:**  
-  [Desventaja de adoptarla]
+  Incremento de complejidad inicial para gestionar el estado del contexto a través de la tubería.
 
-- [Repetir consecuencias]
-
-- **Opción rechazada:**  
-  [Opción rechazada]
-
-[Describa aquí el contexto que resulta después de aplicar la decisión. Todas las consecuencias deben enumerarse, no solo las consecuencias "positivas". Indique también las consecuencias "negativas".]
+- **Opción rechazada:**
+  - Enfoque Monolítico
+    Se rechazó la creación de un único servicio de reserva con una función lineal gigante. Aunque es más simple de implementar inicialmente, viola el principio de Responsabilidad Única (SRP) y hace que el sistema sea extremadamente rígido
+  - Responsabilidad en Cadena
+    Se descartó porque semánticamente este patrón se utiliza para que uno de muchos receptores maneje una petición y detenga el flujo. En nuestro sistema de vuelos, necesitamos que todos los filtros procesen la reserva de forma acumulativa.
 
 ---
 
 ## Material de referencia
+
 [LINK]
-
-
 
 # Sistema de Reservas de Vuelos
 
